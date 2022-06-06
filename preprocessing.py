@@ -18,8 +18,6 @@ cols = ['date_block_num','shop_id','item_id']
 
 # 移除離群值
 sales = sales[(sales['item_price'] < 50000 )& (sales['item_cnt_day'] < 750) & (sales['item_price'] > 0) & (sales['item_cnt_day'] > 0)]
-item_sales_count=sales.groupby(['item_id'])['date'].count()
-item_max_date_block=sales.groupby(["item_id"])["date_block_num"].max()
 
 # 將相同店名的商店設為同類
 sales['shop_id']=sales['shop_id'].replace({0:57,1:58,11:10,40:39,23:24})
@@ -33,6 +31,7 @@ shops["city"] = shops['shop_name'].str.split(" ").map( lambda x: x[0] )
 shops.loc[shops["city"] == "!Якутск", "city"] = "Якутск"
 shops["shop_city"] = LabelEncoder().fit_transform( shops["city"] )
 
+# 商店歸類
 shops["category"] = shops['shop_name'].str.split(" ").map( lambda x: x[1] )
 shop_location_dict={'ТК':1,'ТЦ':4,'ТРК':2,'ТРЦ':3,'МТРЦ':0}
 shops['shop_category'] = shops['category'].apply( lambda x: shop_location_dict[x] if x in shop_location_dict else 0 )
