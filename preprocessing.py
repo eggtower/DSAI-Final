@@ -45,7 +45,9 @@ for cat in cats["type"].unique():
     if len(cats[cats["type"] == cat]) >= 5: 
         category.append( cat )
 cats["subtype"] = cats["type"].apply(lambda x: x if (x in category) else "others")
-cats["subtype2"] = cats["subtype"]
+
+cats['main_type'] = LabelEncoder().fit_transform(cats['type'])
+cats['sub_type'] = LabelEncoder().fit_transform(cats['subtype'])
 cats = cats[['item_category_id','main_type', 'sub_type']]
 
 items.drop(['item_name'], axis=1, inplace=True)
