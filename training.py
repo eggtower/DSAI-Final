@@ -143,7 +143,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
-    Train = train(args.pre,'XGB')
+    Train = Train(args.pre,'XGB')
     # Train = train(args.pre,'LGBM')
     # Train = train(args.pre,'CatBoost')
     Train.main()
