@@ -9,7 +9,7 @@ pip install -r requirements.txt
 ```
 資料前處理
 ```
-python preprocessing.py
+python featureEngineering.py
 ```
 模型訓練
 ```
