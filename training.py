@@ -25,10 +25,51 @@ class Train:
 
     def data_loader(self):
         self.data = pd.read_pickle(self.DataName)
-    #     self.data = self.data[['date_block_num', 'shop_id', 'item_id', 'item_cnt_month', 'ID',
-    #    'shop_category', 'shop_city', 'item_category_id', 'main_type',
-    #    'sub_type', 'sub_type2', 'month', 'year', 'item_shop_last_sale',
-    #    'item_last_sale', 'item_shop_first_sale', 'item_first_sale']]
+        # self.data = self.data[['date_block_num', 'shop_id', 'item_id', 'item_cnt_month', 'ID',
+        #                     'shop_category', 'shop_city', 'item_category_id', 'main_type',
+        #                     'sub_type', 'sub_type2', 'month', 'year', 'item_shop_last_sale',
+        #                     'item_last_sale', 'item_shop_first_sale', 'item_first_sale']]
+        self.data = self.data[[
+        'date_block_num',
+        'shop_id',
+        'item_id',
+        'item_cnt_month',
+        # 'city_code',
+        'item_category_id',
+        # 'type_code',
+        'subtype_code',
+        'item_cnt_month_lag_1',
+        'item_cnt_month_lag_2',
+        'item_cnt_month_lag_3',
+        'item_cnt_month_lag_6',
+        'item_cnt_month_lag_12',
+        'date_avg_item_cnt_lag_1',
+        'date_item_avg_item_cnt_lag_1',
+        'date_item_avg_item_cnt_lag_2',
+        'date_item_avg_item_cnt_lag_3',
+        'date_item_avg_item_cnt_lag_6',
+        # 'date_item_avg_item_cnt_lag_12',
+        'date_shop_avg_item_cnt_lag_1',
+        'date_shop_avg_item_cnt_lag_2',
+        'date_shop_avg_item_cnt_lag_3',
+        'date_shop_avg_item_cnt_lag_6',
+        # 'date_shop_avg_item_cnt_lag_12',
+        'date_cat_avg_item_cnt_lag_1',
+        'date_shop_cat_avg_item_cnt_lag_1',
+        #'date_shop_type_avg_item_cnt_lag_1',
+        #'date_shop_subtype_avg_item_cnt_lag_1',
+        'date_city_avg_item_cnt_lag_1',
+        'date_item_city_avg_item_cnt_lag_1',
+        #'date_type_avg_item_cnt_lag_1',
+        #'date_subtype_avg_item_cnt_lag_1',
+        'delta_price_lag',
+        'month',
+        'days',
+        # 'item_shop_last_sale',
+        'item_last_sale',
+        'item_shop_first_sale',
+        'item_first_sale',
+        ]]
         self.cat_feats = ['shop_id','shop_city','item_category_id','main_type','sub_type']
 
     def dataset_split(self,data):
@@ -40,15 +81,10 @@ class Train:
 
     def XGB_model_building(self):
         model = XGBRegressor(
-            booster ='gbtree',
-            objective = 'reg:squarederror',
-            eval_metric='rmse',
-            gamma = 3.866115369278931e-08,
-            min_child_weight = 36.28309377320559,
-            max_depth = 11,
-            subsample = 0.5871817395511052,
-            colsample_bytree= 0.8278290725391293,
-            tree_method = 'exact',
+            min_child_weight = 300,
+            max_depth = 10,
+            subsample = 0.79,
+            colsample_bytree= 0.83,
             learning_rate = 0.01,
             n_estimators = 2000,
             seed = 42)
