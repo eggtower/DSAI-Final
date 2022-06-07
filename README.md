@@ -19,7 +19,7 @@ python training.py
 
 ## 檔案說明
 
-- `preprocessing.py`：進行資料前處理的檔案，會將 training data 製作成特徵，儲存在 `data.pkl`。
+- `featureEngineering.py`：進行資料前處理的檔案，會將 training data 製作成特徵，儲存在 `data.pkl`。
 - `training.py`：模型訓練與競賽預測，預設模型為 XGBoost，可以透過修改主程式輸入的模型代號更換訓練的模型(`LGBM`,`CatBoost`)
 - `data.pkl`：保存特徵的檔案。
 - `submission.csv`：經由運行`training.py`產生的檔案，競賽最終所繳交的檔案。
