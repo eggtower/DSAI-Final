@@ -3,6 +3,7 @@
 ## 使用說明
 
 環境 `python:3.7.13`
+
 安裝相依套件
 ```
 pip install -r requirements.txt
@@ -32,6 +33,19 @@ python training.py
 
 ![image](https://user-images.githubusercontent.com/13596525/172260736-c0c621a9-1e0b-4bb3-a416-243ed0a3a569.png)
 ![image](https://user-images.githubusercontent.com/13596525/172260755-6149f9d3-6e30-43fa-ae17-ad1356113fb3.png)
+
+# 特徵選用
+
+- 'date_block_num'
+- 'shop_id'
+- 'item_id'
+- 'item_cnt_month’
+- 月銷售滯後 1, 2, 3, 6 個月
+- 日商品銷售滯後 1, 2, 3, 6 個月
+- 日商店銷售滯後 1 個月
+- 月份/ 日期
+- 初次銷售、最後一次銷售
+
 
 ## 模型選擇
 
