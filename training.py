@@ -36,7 +36,7 @@ class Train:
         'item_cnt_month',
         # 'city_code',
         'item_category_id',
-        # 'type_code',
+        'type_code',
         'subtype_code',
         'item_cnt_month_lag_1',
         'item_cnt_month_lag_2',
@@ -70,7 +70,7 @@ class Train:
         'item_shop_first_sale',
         'item_first_sale',
         ]]
-        self.cat_feats = ['shop_id','shop_city','item_category_id','main_type','sub_type']
+        self.cat_feats = ['shop_id','item_category_id','subtype_code','type_code']
 
     def dataset_split(self,data):
         self.X_train = data[data.date_block_num < 33].drop(['item_cnt_month'], axis=1)
