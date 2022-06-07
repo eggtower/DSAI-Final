@@ -33,24 +33,6 @@ python training.py
 ![image](https://user-images.githubusercontent.com/13596525/172260736-c0c621a9-1e0b-4bb3-a416-243ed0a3a569.png)
 ![image](https://user-images.githubusercontent.com/13596525/172260755-6149f9d3-6e30-43fa-ae17-ad1356113fb3.png)
 
-
-## 使用特徵
-|特徵|說明|
-|--|--|
-|date_block_num|時間編號|
-|shop_id|商店ID|
-|shop_city|商店位於的城市編號|
-|sub_type|商品的子類別編號|
-|item_id|商品ID|
-|item_category_id|商品類別ID|
-|item_shop_last_sale|從商品與商店的組合中找出最後一次銷售的時間編號|
-|item_last_sale|商品最後一次銷售的時間編號|
-|item_shop_first_sale|從商品與商店的組合中找出第一次銷售的時間編號|
-|item_first_sale|商品第一次銷售的時間編號|
-|main_type|商品的主要類別編號|
-|month|月份|
-|year|年(1或2)|
-
 ## 模型選擇
 
 採用Kaggle競賽常用的模型，包含`XGBoost`、`LightGBM`、`CatBoost`。
