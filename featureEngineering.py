@@ -51,7 +51,6 @@ cats = cats[['item_category_id','type_code', 'subtype_code']]
 items.drop(['item_name'], axis=1, inplace=True)
 
 # 月銷售
-
 matrix = []
 cols = ['date_block_num','shop_id','item_id']
 for i in range(34):
@@ -84,9 +83,10 @@ test['date_block_num'] = 34
 test['date_block_num'] = test['date_block_num'].astype(np.int8)
 test['shop_id'] = test['shop_id'].astype(np.int8)
 test['item_id'] = test['item_id'].astype(np.int16)
+matrix = pd.concat([matrix, test], ignore_index=True, sort=False, keys=cols)
+matrix.fillna(0, inplace=True) # 34 month
 
 # Merge features
-
 matrix = pd.merge(matrix, shops, on=['shop_id'], how='left')
 matrix = pd.merge(matrix, items, on=['item_id'], how='left')
 matrix = pd.merge(matrix, cats, on=['item_category_id'], how='left')
@@ -106,7 +106,6 @@ def lag_feature(df, lags, col):
         df = pd.merge(df, shifted, on=['date_block_num','shop_id','item_id'], how='left')
     return df
 # 滯後 1,2,3,6,12 個月
-
 matrix = lag_feature(matrix, [1,2,3,6,12], 'item_cnt_month')
 
 
@@ -138,7 +137,6 @@ matrix = meanEncoder(matrix, ['date_block_num', 'subtype_code'], 'date_subtype_a
 
 # Trend features
 # Price trend for the last six months.
-
 group = train.groupby(['item_id']).agg({'item_price': ['mean']})
 group.columns = ['item_avg_item_price']
 group.reset_index(inplace=True)
@@ -180,7 +178,6 @@ matrix.drop(fetures_to_drop, axis=1, inplace=True)
 
 
 # Last month shop revenue trend
-
 group = train.groupby(['date_block_num','shop_id']).agg({'revenue': ['sum']})
 group.columns = ['date_shop_revenue']
 group.reset_index(inplace=True)
@@ -209,7 +206,6 @@ matrix['month'] = matrix['date_block_num'] % 12
 days = pd.Series([31,28,31,30,31,30,31,31,30,31,30,31])
 matrix['days'] = matrix['month'].map(days).astype(np.int8)
 # 商店最後一次銷售紀錄
-
 cache = {}
 matrix['item_shop_last_sale'] = -1
 matrix['item_shop_last_sale'] = matrix['item_shop_last_sale'].astype(np.int8)
@@ -224,7 +220,6 @@ for idx, row in matrix.iterrows():
         cache[key] = row.date_block_num         
 
 # 最後一次銷售紀錄
-
 cache = {}
 matrix['item_last_sale'] = -1
 matrix['item_last_sale'] = matrix['item_last_sale'].astype(np.int8)
@@ -240,18 +235,15 @@ for idx, row in matrix.iterrows():
             cache[key] = row.date_block_num         
 
 # 每個商店/物品對和物品的首次銷售後的月數
-
 matrix['item_shop_first_sale'] = matrix['date_block_num'] - matrix.groupby(['item_id','shop_id'])['date_block_num'].transform('min')
 matrix['item_first_sale'] = matrix['date_block_num'] - matrix.groupby('item_id')['date_block_num'].transform('min')
 
 
 # 刪除不含滯後的 dataset
-
 matrix = matrix[matrix.date_block_num > 11]
 
 
 # 移除 none 欄位
-
 def fill_na(df):
     for col in df.columns:
         if ('_lag_' in col) & (df[col].isnull().any()):
