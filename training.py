@@ -144,13 +144,7 @@ class Train:
         return model
 
     def test(self):
-        Y_pred = self.model.predict(self.X_valid).clip(0, 20)
         Y_test = self.model.predict(self.X_test).clip(0, 20)
-
-        X_train_level2 = pd.DataFrame({
-            "ID": np.arange(Y_pred.shape[0]), 
-            "item_cnt_month": Y_pred
-        })
 
         submission = pd.DataFrame({
             "ID": np.arange(Y_test.shape[0]), 
