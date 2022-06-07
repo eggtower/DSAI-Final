@@ -1,3 +1,5 @@
+# code reference: https://www.kaggle.com/code/dlarionov/feature-engineering-xgboost
+
 import numpy as np
 import pandas as pd
 pd.set_option('display.max_rows', 500)
@@ -5,10 +7,6 @@ pd.set_option('display.max_columns', 100)
 
 from itertools import product
 from sklearn.preprocessing import LabelEncoder
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-%matplotlib inline
 
 import time
 import sys
@@ -19,12 +17,11 @@ def plot_features(booster, figsize):
     fig, ax = plt.subplots(1,1,figsize=figsize)
     return plot_importance(booster=booster, ax=ax)
 
-items = pd.read_csv('../input/items.csv')
-shops = pd.read_csv('../input/shops.csv')
-cats = pd.read_csv('../input/item_categories.csv')
-train = pd.read_csv('../input/sales_train.csv')
-# set index to ID to avoid droping it later
-test  = pd.read_csv('../input/test.csv').set_index('ID')
+items = pd.read_csv('input/items.csv')
+shops = pd.read_csv('input/shops.csv')
+cats = pd.read_csv('input/item_categories.csv')
+train = pd.read_csv('input/sales_train.csv')
+test  = pd.read_csv('input/test.csv').set_index('ID')
 
 # 移除離群值
 train = train[train.item_price<50000]
@@ -54,7 +51,7 @@ cats = cats[['item_category_id','type_code', 'subtype_code']]
 items.drop(['item_name'], axis=1, inplace=True)
 
 # 月銷售
-ts = time.time()
+
 matrix = []
 cols = ['date_block_num','shop_id','item_id']
 for i in range(34):
@@ -66,11 +63,11 @@ matrix['date_block_num'] = matrix['date_block_num'].astype(np.int8)
 matrix['shop_id'] = matrix['shop_id'].astype(np.int8)
 matrix['item_id'] = matrix['item_id'].astype(np.int16)
 matrix.sort_values(cols,inplace=True)
-time.time() - ts
+
 
 train['revenue'] = train['item_price'] *  train['item_cnt_day']
 
-ts = time.time()
+
 group = train.groupby(['date_block_num','shop_id','item_id']).agg({'item_cnt_day': ['sum']})
 group.columns = ['item_cnt_month']
 group.reset_index(inplace=True)
@@ -80,7 +77,7 @@ matrix['item_cnt_month'] = (matrix['item_cnt_month']
                                 .fillna(0)
                                 .clip(0,20) # NB clip target here
                                 .astype(np.float16))
-time.time() - ts
+
 
 # Test set
 test['date_block_num'] = 34
@@ -89,7 +86,7 @@ test['shop_id'] = test['shop_id'].astype(np.int8)
 test['item_id'] = test['item_id'].astype(np.int16)
 
 # Merge features
-ts = time.time()
+
 matrix = pd.merge(matrix, shops, on=['shop_id'], how='left')
 matrix = pd.merge(matrix, items, on=['item_id'], how='left')
 matrix = pd.merge(matrix, cats, on=['item_category_id'], how='left')
@@ -97,7 +94,7 @@ matrix['city_code'] = matrix['city_code'].astype(np.int8)
 matrix['item_category_id'] = matrix['item_category_id'].astype(np.int8)
 matrix['type_code'] = matrix['type_code'].astype(np.int8)
 matrix['subtype_code'] = matrix['subtype_code'].astype(np.int8)
-time.time() - ts
+
 
 # 滯後
 def lag_feature(df, lags, col):
@@ -109,13 +106,13 @@ def lag_feature(df, lags, col):
         df = pd.merge(df, shifted, on=['date_block_num','shop_id','item_id'], how='left')
     return df
 # 滯後 1,2,3,6,12 個月
-ts = time.time()
+
 matrix = lag_feature(matrix, [1,2,3,6,12], 'item_cnt_month')
-time.time() - ts
+
 
 # 取 Mean feature
 def meanEncoder(matrix, groupList, columnName, lags):
-    ts = time.time()
+    
     group = matrix.groupby(groupList).agg({'item_cnt_month': ['mean']})
     group.columns = [ columnName ]
     group.reset_index(inplace=True)
@@ -124,7 +121,7 @@ def meanEncoder(matrix, groupList, columnName, lags):
     matrix[columnName] = matrix[columnName].astype(np.float16)
     matrix = lag_feature(matrix, lags, columnName)
     matrix.drop([columnName], axis=1, inplace=True)
-    time.time() - ts
+    
     return matrix
 # Mean features
 matrix = meanEncoder(matrix, ['date_block_num'], 'date_avg_item_cnt', [1])
@@ -141,7 +138,7 @@ matrix = meanEncoder(matrix, ['date_block_num', 'subtype_code'], 'date_subtype_a
 
 # Trend features
 # Price trend for the last six months.
-ts = time.time()
+
 group = train.groupby(['item_id']).agg({'item_price': ['mean']})
 group.columns = ['item_avg_item_price']
 group.reset_index(inplace=True)
@@ -180,10 +177,10 @@ for i in lags:
 
 matrix.drop(fetures_to_drop, axis=1, inplace=True)
 
-time.time() - ts
+
 
 # Last month shop revenue trend
-ts = time.time()
+
 group = train.groupby(['date_block_num','shop_id']).agg({'revenue': ['sum']})
 group.columns = ['date_shop_revenue']
 group.reset_index(inplace=True)
@@ -204,7 +201,7 @@ matrix['delta_revenue'] = matrix['delta_revenue'].astype(np.float16)
 matrix = lag_feature(matrix, [1], 'delta_revenue')
 
 matrix.drop(['date_shop_revenue','shop_avg_revenue','delta_revenue'], axis=1, inplace=True)
-time.time() - ts
+
 
 # Month
 matrix['month'] = matrix['date_block_num'] % 12
@@ -212,7 +209,7 @@ matrix['month'] = matrix['date_block_num'] % 12
 days = pd.Series([31,28,31,30,31,30,31,31,30,31,30,31])
 matrix['days'] = matrix['month'].map(days).astype(np.int8)
 # 商店最後一次銷售紀錄
-ts = time.time()
+
 cache = {}
 matrix['item_shop_last_sale'] = -1
 matrix['item_shop_last_sale'] = matrix['item_shop_last_sale'].astype(np.int8)
@@ -225,9 +222,9 @@ for idx, row in matrix.iterrows():
         last_date_block_num = cache[key]
         matrix.at[idx, 'item_shop_last_sale'] = row.date_block_num - last_date_block_num
         cache[key] = row.date_block_num         
-time.time() - ts
+
 # 最後一次銷售紀錄
-ts = time.time()
+
 cache = {}
 matrix['item_last_sale'] = -1
 matrix['item_last_sale'] = matrix['item_last_sale'].astype(np.int8)
@@ -241,20 +238,20 @@ for idx, row in matrix.iterrows():
         if row.date_block_num>last_date_block_num:
             matrix.at[idx, 'item_last_sale'] = row.date_block_num - last_date_block_num
             cache[key] = row.date_block_num         
-time.time() - ts
+
 # 每個商店/物品對和物品的首次銷售後的月數
-ts = time.time()
+
 matrix['item_shop_first_sale'] = matrix['date_block_num'] - matrix.groupby(['item_id','shop_id'])['date_block_num'].transform('min')
 matrix['item_first_sale'] = matrix['date_block_num'] - matrix.groupby('item_id')['date_block_num'].transform('min')
-time.time() - ts
+
 
 # 刪除不含滯後的 dataset
-ts = time.time()
+
 matrix = matrix[matrix.date_block_num > 11]
-time.time() - ts
+
 
 # 移除 none 欄位
-ts = time.time()
+
 def fill_na(df):
     for col in df.columns:
         if ('_lag_' in col) & (df[col].isnull().any()):
@@ -263,7 +260,7 @@ def fill_na(df):
     return df
 
 matrix = fill_na(matrix)
-time.time() - ts
+
 
 matrix.to_pickle('data.pkl')
 del matrix
