@@ -57,4 +57,4 @@ python training.py
 
 ||XGBoost|LightGBM|CatBoost|
 |--|--|--|--|
-|Score|0.91600|1.01463|1.01070|
+|Score|0.91285|0.88610|1.01070|
